@@ -1,0 +1,199 @@
+mql5
+//+------------------------------------------------------------------+
+//|                                             PhythonML.mq5        |
+//|                      Developed by Forex Robot Easy Team           |
+//|                          Website: forexroboteasy.com              |
+//+------------------------------------------------------------------+
+
+// Import necessary libraries
+#include <PythonObject.mqh>
+#include <PythonArray.mqh>
+
+//+------------------------------------------------------------------+
+//| Expert initialization function                                   |
+//+------------------------------------------------------------------+
+int OnInit()
+{
+   // Initialize Python environment
+   if(!Python_Init())
+   {
+      Print('Error initializing Python environment');
+      return INIT_FAILED;
+   }
+   
+   // Load machine learning models
+   if(!LoadModels())
+   {
+      Print('Error loading machine learning models');
+      return INIT_FAILED;
+   }
+   
+   // Set up trading parameters
+   SetTradingParameters();
+   
+   return INIT_SUCCEEDED;
+}
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+   // Unload machine learning models
+   UnloadModels();
+   
+   // Clean up Python environment
+   Python_Finalize();
+}
+
+//+------------------------------------------------------------------+
+//| Expert tick function                                             |
+//+------------------------------------------------------------------+
+void OnTick()
+{
+   // Check if market analysis is required
+   if(IsMarketAnalysisRequired())
+   {
+      // Perform market analysis using machine learning models
+      PerformMarketAnalysis();
+   }
+   
+   // Check if trading is allowed
+   if(IsTradingAllowed())
+   {
+      // Perform algorithmic trading
+      PerformAlgorithmicTrading();
+   }
+}
+
+//+------------------------------------------------------------------+
+//| Load machine learning models from Python                          |
+//+------------------------------------------------------------------+
+bool LoadModels()
+{
+   // Load models for each currency pair
+   for(int i=0; i<28; i++)
+   {
+      PythonObject model('model_' + i);
+      
+      if(!model.Load('model_' + i + '.pkl'))
+      {
+         Print('Error loading model for currency pair ' + i);
+         return false;
+      }
+   }
+   
+   return true;
+}
+
+//+------------------------------------------------------------------+
+//| Unload machine learning models                                   |
+//+------------------------------------------------------------------+
+void UnloadModels()
+{
+   // Unload models for each currency pair
+   for(int i=0; i<28; i++)
+   {
+      PythonObject model('model_' + i);
+      model.Unload();
+   }
+}
+
+//+------------------------------------------------------------------+
+//| Set up trading parameters                                        |
+//+------------------------------------------------------------------+
+void SetTradingParameters()
+{
+   // Set up time interval parameters
+   int timeInterval1 = 1; // H1
+   int timeInterval2 = 2; // H2
+   
+   // Set up advanced model parameters
+   int numPackages = 5;
+   int selectedPackage = 3;
+   
+   // Save parameters to Expert Advisor inputs
+   ExpertParameterSetInteger('TimeInterval1', timeInterval1);
+   ExpertParameterSetInteger('TimeInterval2', timeInterval2);
+   ExpertParameterSetInteger('NumPackages', numPackages);
+   ExpertParameterSetInteger('SelectedPackage', selectedPackage);
+}
+
+//+------------------------------------------------------------------+
+//| Check if market analysis is required                              |
+//+------------------------------------------------------------------+
+bool IsMarketAnalysisRequired()
+{
+   // Get selected time intervals from Expert Advisor inputs
+   int timeInterval1 = ExpertParameterGetInteger('TimeInterval1');
+   int timeInterval2 = ExpertParameterGetInteger('TimeInterval2');
+   
+   // Check if either time interval is selected
+   if(timeInterval1 == 1 || timeInterval2 == 1)
+   {
+      return true;
+   }
+   
+   return false;
+}
+
+//+------------------------------------------------------------------+
+//| Perform market analysis using machine learning models            |
+//+------------------------------------------------------------------+
+void PerformMarketAnalysis()
+{
+   // Get selected packages from Expert Advisor inputs
+   int numPackages = ExpertParameterGetInteger('NumPackages');
+   int selectedPackage = ExpertParameterGetInteger('SelectedPackage');
+   
+   // Perform market analysis for each currency pair
+   for(int i=0; i<28; i++)
+   {
+      // Load model for currency pair
+      PythonObject model('model_' + i);
+      
+      // Select appropriate package for currency pair
+      PythonObject package = model.GetAttribute('package_' + selectedPackage);
+      
+      // Perform market analysis using the selected package
+      PythonArray marketAnalysis = package.CallMethod('perform_analysis');
+      
+      // Process market analysis results
+      ProcessMarketAnalysis(i, marketAnalysis);
+   }
+}
+
+//+------------------------------------------------------------------+
+//| Process market analysis results                                  |
+//+------------------------------------------------------------------+
+void ProcessMarketAnalysis(const int currencyPair, PythonArray marketAnalysis)
+{
+   // TODO: Implement processing of market analysis results
+   
+   // Example: Print market analysis results for each currency pair
+   for(int i=0; i<marketAnalysis.Size(); i++)
+   {
+      double analysisResult = marketAnalysis[i].ToDouble();
+      Print('Currency pair ' + currencyPair + ' analysis result: ' + analysisResult);
+   }
+}
+
+//+------------------------------------------------------------------+
+//| Check if trading is allowed                                       |
+//+------------------------------------------------------------------+
+bool IsTradingAllowed()
+{
+   // TODO: Implement trading permission logic
+   
+   return true;
+}
+
+//+------------------------------------------------------------------+
+//| Perform algorithmic trading                                       |
+//+------------------------------------------------------------------+
+void PerformAlgorithmicTrading()
+{
+   // TODO: Implement algorithmic trading logic
+}
+
+//+------------------------------------------------------------------+
